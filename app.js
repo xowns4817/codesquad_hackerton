@@ -259,7 +259,7 @@ app.get('/board', function(req, res) {
     });
   });
 
-  //게시물 position 값 변경 -> 게시물에 참가함
+  //게시물에 참가함
 app.post('/join/:boardId/:positionId', function(req, res) {
 
     var writer_id = req.body.userAuthId;
@@ -281,7 +281,7 @@ app.post('/join/:boardId/:positionId', function(req, res) {
 //게시물에 참가한 각 파트별 인원
 app.get('/participate/count/:boardId/', function(req, res){
 
-    var boardId = req.params.boardId;
+    var boardId = parseInt(req.params.boardId;);
     var android, ios, design, frontEnd, backEnd;
 
     android = ios = design = frontEnd = backEnd = 0; // 각 파트별 인원
@@ -317,7 +317,7 @@ app.get('/participate/count/:boardId/', function(req, res){
 //게시물에 참가한 각 파트별 닉네임
 app.get('/participate/name/:boardId', function(req, res){
 
-    var boardId = req.params.boardId;
+    var boardId = parseInt(req.params.boardId);
     var android = [ ];
     var ios = [ ];
     var design = [ ];
@@ -325,78 +325,42 @@ app.get('/participate/name/:boardId', function(req, res){
     var backEnd = [ ];
     var name_result = [ ];
 
-    var sql = "SELECT * from participate_table where boardId=?";
-    con.query(sql, [boardId], function(err, results, fields) {
-        
-        if(err) {
-            console.log(err);
-        }
-        else {
+     var sql = "SELECT user_table.displayName, participate_table.boardId, participate_table.positionId from user_table JOIN participate_table ON user_table.id = participate_table.userId";
+        con.query(sql, [ ], function(err, results, fields){
 
             for(var i=0; i<results.length; i++) {
-                if(results[i].positionId == 1) {
 
-                    var sql = "SELECT displayName from user_table JOIN participate_table ON user_table.id = ?";
-                    con.query(sql, [results[i].userId], function(err, results2, fields){
+             if(results[i].boardId === boardId) { // android
 
-                        if(err) console.log(err);
-                        else android.push(results2[0]);
-                    });
+                 if(results[i].positionId === 1) {
+                     android.push(results[i].displayName);
+                 }
+                 else if(results[i].positionId === 2){ // ios
+                    ios.push(results[i].displayName);
+                 }
+                 else if(results[i].positionId === 3){ // design
+                    design.push(results[i].displayName);
+                 }
+                 else if(results[i].positionId === 4){ // frontEnd
+                    frontEnd.push(results[i].displayName);
+                 }
+                 else if(results[i].positionId === 5){ // backEnd
+                    backEnd.push(results[i].displayName);
+                 }
                 }
+            } 
 
-                if(results[i].positionId == 2) {
-
-                    var sql = "SELECT displayName from user_table JOIN participate_table ON user_table.id = ?";
-                    con.query(sql, [results[i].userId], function(err, results2, fields){
-
-                        if(err) console.log(err);
-                        else ios.push(results2[0]);
-                    });
-                }
-               
-                if(results[i].positionId == 3) {
-
-                    var sql = "SELECT displayName from user_table JOIN participate_table ON user_table.id = ?";
-                    con.query(sql, [results[i].userId], function(err, results2, fields){
-
-                        if(err) console.log(err);
-                        else design.push(results2[0]);
-                    });
-                }
-
-                 if(results[i].positionId == 4) {
-
-                    var sql = "SELECT displayName from user_table JOIN participate_table ON user_table.id = ?";
-                    con.query(sql, [results[i].userId], function(err, results2, fields){
-
-                        if(err) console.log(err);
-                        else frontEnd.push(results2[0]);
-                    });
-                }
-
-                if(results[i].positionId == 5) {
-
-                    var sql = "SELECT displayName from user_table JOIN participate_table ON user_table.id = ?";
-                    con.query(sql, [results[i].userId], function(err, results2, fields){
-
-                        if(err) console.log(err);
-                        else backEnd.push(results2[0]);
-                    });
-                }
-            }
-        }
-
-        name_result.push({android: android});
-        name_result.push({ios: ios});
-        name_result.push({design: design});
-        name_result.push({frontEnd: frontEnd});
-        name_result.push({backEnd: backEnd});
-    
-        res.send(JSON.stringify({nickName :name_result}));
-    });    
+            name_result.push({android: android});
+            name_result.push({ios: ios});
+            name_result.push({design: design});
+            name_result.push({frontEnd: frontEnd});
+            name_result.push({backEnd: backEnd});
+        
+            res.send(JSON.stringify({nickName :name_result}));
+         });    
 })
 
-app.listen(3000, function() {
-    console.log('Connected 3000 port');
+app.listen(80, function() {
+    console.log('Connected 80 port');
 });
 
